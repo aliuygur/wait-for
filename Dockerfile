@@ -2,8 +2,8 @@
 FROM golang:1.8
 COPY . /app/
 WORKDIR /app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o wait .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o wait-for .
 
 FROM scratch
-COPY --from=0 /app/wait /app/wait
-ENTRYPOINT [ "/app/wait" ]
+COPY --from=0 /app/wait-for /app/wait-for
+ENTRYPOINT [ "/app/wait-for" ]

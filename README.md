@@ -1,7 +1,7 @@
 # wait-for
 
 Go package to test and wait on the availability of a TCP host and port.
-This package is port of [wait-for-it.sh](https://github.com/vishnubob/wait-for-it)
+This package is Go port of [wait-for-it.sh](https://github.com/vishnubob/wait-for-it)
 
 # Usage
 
@@ -18,14 +18,14 @@ wait-for:
 
 ### simple
 ```bash
-$ wait -for github.com:80 && echo "github is up!"
+$ wait-for -for github.com:80 && echo "github is up!"
 services are ready!
 github is up!
 ```
 
 ### multiple hosts and custom timeout
 ```bash
-$ wait -t 5 -for github.com:80,bitbucket.com:80 && echo "github and bitbucket are up!"
+$ wait-for -t 5 -for github.com:80,bitbucket.com:80 && echo "github and bitbucket are up!"
 services are ready!
 github and bitbucket are up!
 ```
@@ -33,6 +33,6 @@ github and bitbucket are up!
 ### docker users
 ~2.7MB docker image.
 ```bash
-$ docker run --rm alioygur/wait -for google.com:80
+$ docker run --rm alioygur/wait-for -for google.com:80
 services are ready!
 ```
