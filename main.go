@@ -55,10 +55,7 @@ func waitForServices(services []string, timeOut time.Duration) error {
 	case <-depChan: // services are ready
 		return nil
 	case <-time.After(timeOut):
-		log.WithFields(log.Fields{
-			"timeout": timeOut,
-		}).Error("services did not repont in time")
-		return fmt.Errorf("")
+		return fmt.Errorf("services did not respond")
 	}
 }
 
@@ -70,7 +67,7 @@ func init() {
 	// })
 
 	log.SetFormatter(&log.JSONFormatter{})
-	log.SetLevel(log.WarnLevel)
+	log.SetLevel(log.InfoLevel)
 	log.SetOutput(os.Stdout)
 	// log = log.WithFields(log.Fields{"service": "tcp-wait"})
 
@@ -86,9 +83,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := waitForServices(services, time.Duration(timeout)*time.Second); err != nil {
+	resp := waitForServices(services, time.Duration(timeout)*time.Second)
+	if resp != nil {
+		log.Error(resp)
 		os.Exit(1)
 	}
-	log.Info("services are ready!")
+
+	log.WithFields(log.Fields{
+		"services": services,
+	}).Info("services are ready!")
+	// log.Infof("services are ready! %s", services)
 	os.Exit(0)
+
 }
