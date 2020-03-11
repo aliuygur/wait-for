@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type servicesType []string
@@ -38,6 +40,9 @@ func waitForServices(services []string, timeOut time.Duration) error {
 					if err == nil {
 						return
 					}
+					log.WithFields(log.Fields{
+						"tcp-host": s,
+					}).Warn("tcp ping failed")
 					time.Sleep(1 * time.Second)
 				}
 			}(s)
@@ -50,16 +55,31 @@ func waitForServices(services []string, timeOut time.Duration) error {
 	case <-depChan: // services are ready
 		return nil
 	case <-time.After(timeOut):
-		return fmt.Errorf("services aren't ready in %s", timeOut)
+		log.WithFields(log.Fields{
+			"timeout": timeOut,
+		}).Error("services did not repont in time")
+		return fmt.Errorf("")
 	}
 }
 
 func init() {
+
+	// log.SetFormatter(&log.TextFormatter{
+	// 	DisableColors: false,
+	// 	FullTimestamp: true,
+	// })
+
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(log.WarnLevel)
+	log.SetOutput(os.Stdout)
+	// log = log.WithFields(log.Fields{"service": "tcp-wait"})
+
 	flag.IntVar(&timeout, "t", 20, "timeout")
 	flag.Var(&services, "it", "<host:port> [host2:port,...] comma seperated list of services")
 }
 
 func main() {
+
 	flag.Parse()
 	if len(services) == 0 {
 		flag.Usage()
@@ -67,9 +87,8 @@ func main() {
 	}
 
 	if err := waitForServices(services, time.Duration(timeout)*time.Second); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println("services are ready!")
+	log.Info("services are ready!")
 	os.Exit(0)
 }
