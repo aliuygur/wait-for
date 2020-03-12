@@ -61,18 +61,25 @@ func waitForServices(services []string, timeOut time.Duration) error {
 
 func init() {
 
-	// log.SetFormatter(&log.TextFormatter{
-	// 	DisableColors: false,
-	// 	FullTimestamp: true,
-	// })
+	flag.IntVar(&timeout, "t", 20, "timeout")
+	flag.Var(&services, "it", "<host:port> [host2:port,...] comma seperated list of services")
 
-	log.SetFormatter(&log.JSONFormatter{})
+	output := flag.String("o", "json", "output in format json/text")
+	flag.Parse()
+
+	if *output == "text" {
+		log.SetFormatter(&log.TextFormatter{
+			DisableColors: false,
+			FullTimestamp: true,
+		})
+	} else {
+		log.SetFormatter(&log.JSONFormatter{})
+	}
+
 	log.SetLevel(log.InfoLevel)
 	log.SetOutput(os.Stdout)
 	// log = log.WithFields(log.Fields{"service": "tcp-wait"})
 
-	flag.IntVar(&timeout, "t", 20, "timeout")
-	flag.Var(&services, "it", "<host:port> [host2:port,...] comma seperated list of services")
 }
 
 func main() {
