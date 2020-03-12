@@ -8,11 +8,19 @@ This package is Go port of [wait-for-it.sh](https://github.com/vishnubob/wait-fo
 First clone down the repository then use the make file to build what you need. There is a simple single binary build below, but you also have `build-all` and other commands available in the makefile.
 
 ```bash
-# build a binary for your system
-$ make build
+# build and run using make all
+$ make all
+go get
+go test -v ./...
+?       tcp-wait        [no test files]
 go build -o ./bin/tcp-wait -v
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/linux/tcp-wait -v
+tcp-wait
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/mac/tcp-wait -v
+tcp-wait
 
-# it should be imediately executable
+
+# your os binary should be imediately executable
 $ ./bin/tcp-wait
 Usage of ./bin/tcp-wait:
   -it value

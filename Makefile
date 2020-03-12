@@ -9,7 +9,7 @@ BINARY_PATH=./bin/linux/
 BINARY_NAME=tcp-wait
 BINARY_UNIX=$(BINARY_NAME)
 
-all: test build
+all: deps test build-all
 build:
 	$(GOBUILD) -o ./bin/$(BINARY_NAME) -v
 test:
@@ -26,6 +26,7 @@ deps:
 
 # Cross compilation
 build-all:
+	$(GOBUILD) -o ./bin/$(BINARY_NAME) -v
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o bin/linux/$(BINARY_NAME) -v
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) -o bin/mac/$(BINARY_NAME) -v
 docker-build:
