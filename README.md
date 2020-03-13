@@ -12,13 +12,19 @@ First clone down the repository then use the make file to build what you need. T
 $ make all
 go get
 go test -v ./...
-?       tcp-wait        [no test files]
+=== RUN   TestSuccessSingle
+--- PASS: TestSuccessSingle (0.01s)
+=== RUN   TestFailureDouble
+{"level":"warning","msg":"tcp ping failed","tcp-host":"nowhere:50","time":"2020-03-13T11:38:45+10:30"}
+{"level":"warning","msg":"tcp ping failed","tcp-host":"nowhere:51","time":"2020-03-13T11:38:45+10:30"}
+--- PASS: TestFailureDouble (0.50s)
+PASS
+ok      tcp-wait        (cached)
 go build -o ./bin/tcp-wait -v
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/linux/tcp-wait -v
 tcp-wait
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/mac/tcp-wait -v
 tcp-wait
-
 
 # your os binary should be imediately executable
 $ ./bin/tcp-wait
