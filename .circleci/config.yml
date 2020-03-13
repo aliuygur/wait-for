@@ -37,6 +37,12 @@ jobs:
             VERSION=$(my-binary --version)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./bin/
 
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - publish-github-release
 #  # Step 1: Authenticate
 # $ docker login docker.pkg.github.com --username donkeyx
 
