@@ -1,0 +1,60 @@
+version: 2
+jobs:
+  # working_directory: ${WORK_DIRECTORY}
+
+  build:
+    docker:
+      - image: circleci/golang:1.14
+
+    environment: # environment variables for the build itself
+      TEST_RESULTS: /go/test-results # path to where test results will be saved
+      # WORK_DIRECTORY: /go/src/${CIRCLE_BRANCH}
+
+    steps:
+      - checkout
+      - run: mkdir -p $TEST_RESULTS
+
+      - run:
+          name: build
+          command: make
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bin
+
+  publish-github-release:
+    docker:
+      - image: circleci/golang:1.14
+    steps:
+      - attach_workspace:
+          at: ./bin
+      - run: ls -lar
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            VERSION=$(my-binary --version)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./bin/
+
+#  # Step 1: Authenticate
+# $ docker login docker.pkg.github.com --username donkeyx
+
+# # Step 2: Tag
+# $ docker tag IMAGE_ID docker.pkg.github.com/donkeyx/docker_cluster-utils/IMAGE_NAME:VERSION
+
+# # Step 3: Publish
+# $ docker push docker.pkg.github.com/donkeyx/docker_cluster-utils/IMAGE_NAME:VERSION
+
+# - save_cache:
+#     key: v1-pkg-cache
+#     paths:
+#       - "/go/pkg"
+# - run:
+#     name: tag and push github
+#     command: |
+#       echo $GITHUB_PASS | docker login docker.pkg.github.com --username $GITHUB_USER --password-stdin
+#       docker tag $build_container $github_repo:latest
+#       docker push $github_repo:latest
+#       docker tag $build_container $github_repo:circleci-${CIRCLE_SHA1}
+#       docker push $github_repo:circleci-${CIRCLE_SHA1}
