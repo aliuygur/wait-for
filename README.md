@@ -18,8 +18,8 @@ go get github.com/donkeyx/tcp-wait
 # add go bin path to your startup shell, bash in this case
 echo 'export PATH="~/go/bin:$PATH"' >> ~/.bashrc
 
-# quick run from there with
-tcp-wait -hp localhost:8080 -t 5
+# quick run from there like this. If either fails it will return error code and messages to match
+tcp-wait -hp localhost:8080,localhost:9090 -t 5
 
 # for help just run with no flags
 tcp-wait -h
