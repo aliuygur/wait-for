@@ -33,8 +33,9 @@ build-all:
 	$(info    ld-flags is $(BUILD_FLAGS))
 
 	$(BUILD_FLAGS) -o ./bin/$(BINARY_NAME) -v
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(BUILD_FLAGS) -o bin/linux/$(BINARY_NAME) -v
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(BUILD_FLAGS) -o bin/mac/$(BINARY_NAME) -v
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(BUILD_FLAGS) -o bin/$(BINARY_NAME).linux.amd64 -v
+	CGO_ENABLED=0 GOOS=windows GOARCH=386 $(BUILD_FLAGS) -o bin/$(BINARY_NAME).windows.amd64 -v
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(BUILD_FLAGS) -o bin/$(BINARY_NAME).darwin.amd64 -v
 
 docker-build:
 	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/bitbucket.org/rsohlich/makepost golang:latest go build -o "$(BINARY_NAME)" -v
