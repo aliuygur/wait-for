@@ -19,8 +19,8 @@ var services servicesType
 
 //version info set with ldflags
 var (
-	Version string = "dev"
-	GitHash string = "hash"
+	Version string = "undefined"
+	GitHash string = "undefined"
 	// BuildDate      string = "date"
 	displayVersion bool
 )
