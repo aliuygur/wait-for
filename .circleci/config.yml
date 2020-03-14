@@ -23,46 +23,24 @@ jobs:
           paths:
             - bin
 
-  publish-github-release:
-    docker:
-      - image: circleci/golang:1.14
-    steps:
-      - attach_workspace:
-          at: ./bin
-      - run: ls -laR
-      - run:
-          name: "Publish Release on GitHub"
-          command: |
-            go get github.com/tcnksm/ghr
-            VERSION=v0.9.0
-            # ghr -t ${GITHUB_TOKEN} -delete ${VERSION} ./bin/
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./bin/
+  # publish-github-release:
+  #   docker:
+  #     - image: circleci/golang:1.14
+  #   steps:
+  #     - attach_workspace:
+  #         at: ./bin
+  #     - run: ls -laR
+  #     - run:
+  #         name: "Publish Release on GitHub"
+  #         command: |
+  #           go get github.com/tcnksm/ghr
+  #           VERSION=v0.9.0
+  #           # ghr -t ${GITHUB_TOKEN} -delete ${VERSION} ./bin/
+  #           ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./bin/
 
 workflows:
   version: 2
   build_and_test:
     jobs:
       - build
-      - publish-github-release
-        # ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./bin/
-      #  # Step 1: Authenticate
-# $ docker login docker.pkg.github.com --username donkeyx
-
-# # Step 2: Tag
-# $ docker tag IMAGE_ID docker.pkg.github.com/donkeyx/docker_cluster-utils/IMAGE_NAME:VERSION
-
-# # Step 3: Publish
-# $ docker push docker.pkg.github.com/donkeyx/docker_cluster-utils/IMAGE_NAME:VERSION
-
-# - save_cache:
-#     key: v1-pkg-cache
-#     paths:
-#       - "/go/pkg"
-# - run:
-#     name: tag and push github
-#     command: |
-#       echo $GITHUB_PASS | docker login docker.pkg.github.com --username $GITHUB_USER --password-stdin
-#       docker tag $build_container $github_repo:latest
-#       docker push $github_repo:latest
-#       docker tag $build_container $github_repo:circleci-${CIRCLE_SHA1}
-#       docker push $github_repo:circleci-${CIRCLE_SHA1}
+      # - publish-github-release

@@ -1,4 +1,4 @@
-module tcp-wait
+module github.com/donkeyx/tcp-wait
 
 go 1.14
 
