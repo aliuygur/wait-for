@@ -6,17 +6,23 @@ jobs:
     docker:
       - image: circleci/golang:1.14
 
-    environment: # environment variables for the build itself
-      TEST_RESULTS: /go/test-results # path to where test results will be saved
-      # WORK_DIRECTORY: /go/src/${CIRCLE_BRANCH}
+    # environment: # environment variables for the build itself
+    #   TEST_RESULTS: /go/test-results # path to where test results will be saved
+    #   # WORK_DIRECTORY: /go/src/${CIRCLE_BRANCH}
 
     steps:
       - checkout
-      - run: mkdir -p $TEST_RESULTS
+      # - run: mkdir -p $TEST_RESULTS
 
       - run:
           name: deps test
           command: make test
+
+      - run: ls -laR
+
+      - store_artifacts:
+          path: ./tmp/test-coverage
+          destination: test-coverage
 
       - persist_to_workspace:
           root: .
@@ -27,18 +33,22 @@ jobs:
     docker:
       - image: circleci/golang:1.14
 
-    environment: # environment variables for the build itself
-      TEST_RESULTS: /go/test-results # path to where test results will be saved
-      # WORK_DIRECTORY: /go/src/${CIRCLE_BRANCH}
+    # environment: # environment variables for the build itself
+    #   TEST_RESULTS: /go/test-results # path to where test results will be saved
+    #   # WORK_DIRECTORY: /go/src/${CIRCLE_BRANCH}
 
     steps:
       - attach_workspace:
           at: .
 
-      - run: ls -laR
+      # - run: ls -laR
       - run:
           name: buid
           command: make build
+
+      - store_artifacts:
+          path: ./bin
+          destination: binaries
 
   # publish-github-release:
   #   docker:

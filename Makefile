@@ -13,7 +13,9 @@ all: clean deps test build-all
 build:
 	go build -o ./bin/$(BINARY_NAME) -v
 test:
-	go test -v ./...
+	mkdir -p tmp/test-coverage
+	go test -coverprofile=tmp/test-coverage/coverage.out
+	go tool cover -html=tmp/test-coverage/coverage.out -o ./tmp/test-coverage/coverage.html
 clean:
 	go clean
 	find ./bin/ -type f | grep -v keep | xargs rm
