@@ -1,10 +1,10 @@
 # tcp-wait
 
-Go package to test and wait on the availability of a TCP host and port. This is mainly used in some
-containers as a pre stat script to wait for ports to be open or die if they don't. It has come in
-handy for other tasks as well like watching ports while you are opening and closing.
+Go package to test and wait on the availability of a TCP host and port. This is mainly used as a pre
+start script for containers which depend on other services before starting. You can run this first
+with a defined interval and die if the host:port does not become available.
 
-Feel free to contribute as I will allow most merges as long as they don't drasticly break the usage.
+Feel free to contribute, as I will allow most merges as long as they don't drastically break the usage.
 
 ## Running
 
