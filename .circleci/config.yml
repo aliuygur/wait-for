@@ -2,7 +2,7 @@ version: 2
 jobs:
   # working_directory: ${WORK_DIRECTORY}
 
-  test:
+  build-test:
     docker:
       - image: circleci/golang:1.14
 
@@ -23,7 +23,7 @@ jobs:
           paths:
             - .
 
-  build:
+  package:
     docker:
       - image: circleci/golang:1.14
 
@@ -35,8 +35,9 @@ jobs:
       - attach_workspace:
           at: .
 
+      - run: ls -laR
       - run:
-          name: buiid
+          name: buid
           command: make build
 
   # publish-github-release:
@@ -58,6 +59,7 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - test
-      - build
-      # - publish-github-release
+      - build-test
+      - package:
+          requires:
+            - build-test
