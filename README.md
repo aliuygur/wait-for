@@ -16,7 +16,7 @@ If you want to use without needing the full path you can add your go path to you
 go get github.com/donkeyx/tcp-wait
 
 # add go bin path to your startup shell, bash in this case
-echo 'export PATH="~/go/bin:$PATH"' ~/.bashrc
+echo 'export PATH="~/go/bin:$PATH"' >> ~/.bashrc
 
 # quick run from there with
 tcp-wait -hp localhost:8080 -t 5
