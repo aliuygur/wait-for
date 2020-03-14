@@ -18,6 +18,9 @@ jobs:
           name: deps test
           command: make test
 
+      - store_test_results:
+          path: ~/tmp/test-coverage/
+
       - persist_to_workspace:
           root: .
           paths:
