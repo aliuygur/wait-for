@@ -20,8 +20,9 @@ jobs:
 
       - run: ls -laR
 
-      - store_test_results:
-          path: ./tmp/test-coverage/
+      - store_artifacts:
+          path: ./tmp/test-coverage
+          destination: test-coverage
 
       - persist_to_workspace:
           root: .
@@ -44,6 +45,10 @@ jobs:
       - run:
           name: buid
           command: make build
+
+      - store_artifacts:
+          path: ./bin
+          destination: binaries
 
   # publish-github-release:
   #   docker:
