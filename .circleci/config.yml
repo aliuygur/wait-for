@@ -35,7 +35,8 @@ jobs:
           command: |
             go get github.com/tcnksm/ghr
             VERSION=v0.9.0
-            ghr -t ${GITHUB_TOKEN} -delete ${VERSION} ./bin/
+            # ghr -t ${GITHUB_TOKEN} -delete ${VERSION} ./bin/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./bin/
 
 workflows:
   version: 2
