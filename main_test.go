@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"testing"
 	"time"
 
@@ -14,6 +15,7 @@ var _ = func() bool {
 }()
 
 func TestSuccessSingle(t *testing.T) {
+	log.SetLevel(log.ErrorLevel)
 	var duration time.Duration = 500 * 1000000 // 100ms
 
 	hosts := []string{"google.com:80"}
@@ -23,6 +25,7 @@ func TestSuccessSingle(t *testing.T) {
 }
 
 func TestFailureDouble(t *testing.T) {
+	log.SetLevel(log.ErrorLevel)
 	var duration time.Duration = 500 * 1000000 // 100ms
 
 	hosts := []string{"nowhere:50", "nowhere:51"}
