@@ -17,6 +17,14 @@ type servicesType []string
 var timeout int
 var services servicesType
 
+//version info set with ldflags
+var (
+	Version string = "dev"
+	GitHash string = "hash"
+	// BuildDate      string = "date"
+	displayVersion bool
+)
+
 func (s *servicesType) String() string {
 	return fmt.Sprintf("%+v", *s)
 }
@@ -24,6 +32,12 @@ func (s *servicesType) String() string {
 func (s *servicesType) Set(value string) error {
 	*s = strings.Split(value, ",")
 	return nil
+}
+
+func GetVersion() {
+	fmt.Printf("Version %s\n", Version)
+	fmt.Printf("Git_Hash %s\n", GitHash)
+	// fmt.Printf("Build_Date %s\n", BuildDate)
 }
 
 // waitForServices tests and waits on the availability of a TCP host and port
@@ -62,11 +76,11 @@ func waitForServices(services []string, timeOut time.Duration) error {
 
 func init() {
 
+	flag.BoolVar(&displayVersion, "version", false, "version information")
 	flag.IntVar(&timeout, "t", 20, "timeout")
-	flag.Var(&services, "it", "<host:port> [host2:port,...] comma seperated list of services")
+	flag.Var(&services, "hp", "<host:port> [host2:port,...] comma seperated list of host:ports")
 
 	output := flag.String("o", "json", "output in format json/text")
-	flag.Parse()
 
 	if *output == "text" {
 		log.SetFormatter(&log.TextFormatter{
@@ -79,9 +93,14 @@ func init() {
 
 	log.SetLevel(log.InfoLevel)
 	log.SetOutput(os.Stdout)
-	// log = log.WithFields(log.Fields{"service": "tcp-wait"})
 
 	flag.Parse()
+
+	// exit on version request
+	if displayVersion {
+		GetVersion()
+		os.Exit(0)
+	}
 }
 
 func main() {

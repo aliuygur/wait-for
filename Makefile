@@ -1,33 +1,38 @@
 
 # Go parameters
-GOCMD=go
-GOBUILD=$(GOCMD) build
-GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test
-GOGET=$(GOCMD) get
-BINARY_PATH=./bin/linux/
-BINARY_NAME=tcp-wait
-BINARY_UNIX=$(BINARY_NAME)
+BINARY_PATH = ./bin/linux/
+BINARY_NAME = tcp-wait
+VERSION ='$(shell git describe --tags)'
+VERSION ='$(shell git symbolic-ref -q --short HEAD || git describe --tags --exact-match)'
+BUILD_DATE='$(shell date)'
+HASH = '$(shell git rev-parse --short HEAD)'
+BUILD_FLAGS = go build -ldflags "-w -s -X main.Version=$(VERSION) -X main.GitHash=$(HASH)"
 
-all: deps test build-all
+
+all: clean deps test build-all
 build:
-	$(GOBUILD) -o ./bin/$(BINARY_NAME) -v
+	go build -o ./bin/$(BINARY_NAME) -v
 test:
-	$(GOTEST) -v ./...
+	go test -v ./...
 clean:
-	$(GOCLEAN)
+	go clean
 	find ./bin/ -type f | grep -v keep | xargs rm
 # run:
 # 	$(GOBUILD) -o $(BINARY_NAME) -v ./...
 # 	./$(BINARY_NAME)
 deps:
-	$(GOGET)
+	go get
 
 
 # Cross compilation
 build-all:
-	$(GOBUILD) -o ./bin/$(BINARY_NAME) -v
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o bin/linux/$(BINARY_NAME) -v
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) -o bin/mac/$(BINARY_NAME) -v
+	$(info    version is $(VERSION))
+	$(info    build_date is $(BUILD_DATE))
+	$(info    ld-flags is $(BUILD_FLAGS))
+
+	$(BUILD_FLAGS) -o ./bin/$(BINARY_NAME) -v
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(BUILD_FLAGS) -o bin/linux/$(BINARY_NAME) -v
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(BUILD_FLAGS) -o bin/mac/$(BINARY_NAME) -v
+
 docker-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/bitbucket.org/rsohlich/makepost golang:latest go build -o "$(BINARY_UNIX)" -v
+	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/bitbucket.org/rsohlich/makepost golang:latest go build -o "$(BINARY_NAME)" -v
