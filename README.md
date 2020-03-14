@@ -58,6 +58,12 @@ $ ./bin/tcp-wait -it github.com:443,localhost:10000 -t 2
 {"level":"error","msg":"services did not respond","time":"2020-03-12T17:26:18+10:30"}
 ```
 
+## Building locally
+
+You can just clone down the repo, then use the make file to build the packages. They will be placed
+in a local bin folder, with linux/mac and a local env build. You can execute them directly from that
+path.
+
 ```bash
 # build and run using make all
 $ make all
@@ -77,7 +83,26 @@ tcp-wait
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/mac/tcp-wait -v
 tcp-wait
 
-# your os binary should be imediately executable
+# structure created with binaries in your local bin directory.
+$ tree
+.
+├── Dockerfile
+├── LICENSE
+├── Makefile
+├── README.md
+├── bin
+│   ├── linux
+│   │   └── tcp-wait
+│   ├── mac
+│   │   └── tcp-wait
+│   └── tcp-wait
+├── go.mod
+├── go.sum
+├── main.go
+└── main_test.go
+
+
+# Binary should be imediately executable
 $ ./bin/tcp-wait
 Usage of ./bin/tcp-wait:
   -it value
