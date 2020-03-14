@@ -6,11 +6,6 @@ handy for other tasks as well like watching ports while you are opening and clos
 
 Feel free to contribute as I will allow most merges as long as they don't drasticly break the usage.
 
-## Building
-
-First clone down the repository then use the make file to build what you need. There is a simple
- single binary build below, but you also have `build-all` and other commands available in the makefile.
-
 ## Running
 
 You can install this using go get and adding to your gopath. You can then use as you would any packages.
