@@ -50,6 +50,45 @@ jobs:
           path: ./bin
           destination: binaries
 
+  docker-build:
+    machine:
+      image: ubuntu-1604:201903-01
+      # docker_layer_caching: true
+    environment:
+      build_container: "build_container"
+      dockerhub_repo: "donkeyx/tcp-wait"
+      github_repo: "docker.pkg.github.com/donkeyx/tcp-wait/tcp-wait"
+
+    steps:
+      - attach_workspace:
+          at: .
+
+      - run: find $(pwd) -type f
+      - run:
+          name: container build
+          command: make docker-build
+
+      - run:
+          name: tag and push dockerhub
+          command: |
+            docker tag tcp-wait $dockerhub_repo:latest
+            docker tag tcp-wait $dockerhub_repo:circleci-${CIRCLE_SHA1}
+
+            echo "$DOCKERHUB_PASS" | docker login --username $DOCKERHUB_USER --password-stdin
+            docker push $dockerhub_repo:circleci-${CIRCLE_SHA1}
+            docker push $dockerhub_repo:latest
+
+      - run:
+          name: tag and push github
+          command: |
+            echo $GITHUB_PASS | docker login docker.pkg.github.com --username $GITHUB_USER --password-stdin
+
+            docker tag tcp-wait $github_repo:latest
+            docker push $github_repo:latest
+
+            docker tag $build_container $github_repo:circleci-${CIRCLE_SHA1}
+            docker push $github_repo:circleci-${CIRCLE_SHA1}
+
   # publish-github-release:
   #   docker:
   #     - image: circleci/golang:1.14
@@ -73,3 +112,6 @@ workflows:
       - package:
           requires:
             - build-test
+      - docker-build:
+          requires:
+            - package
