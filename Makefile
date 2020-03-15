@@ -11,7 +11,8 @@ BUILD_FLAGS = go build -ldflags "-w -s -X main.Version=$(VERSION) -X main.GitHas
 
 all: clean deps test build-all
 build:
-	go build -o ./bin/$(BINARY_NAME) -v
+	CGO_ENABLED=0 $(BUILD_FLAGS) -o bin/$(BINARY_NAME) -v
+	# CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o tcp-wait .
 test:
 	mkdir -p tmp/test-coverage
 	go test -coverprofile=tmp/test-coverage/coverage.out
@@ -32,10 +33,10 @@ build-all:
 	$(info    build_date is $(BUILD_DATE))
 	$(info    ld-flags is $(BUILD_FLAGS))
 
-	$(BUILD_FLAGS) -o ./bin/$(BINARY_NAME) -v
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(BUILD_FLAGS) -o bin/$(BINARY_NAME).linux.amd64 -v
-	CGO_ENABLED=0 GOOS=windows GOARCH=386 $(BUILD_FLAGS) -o bin/$(BINARY_NAME).windows.amd64 -v
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(BUILD_FLAGS) -o bin/$(BINARY_NAME).darwin.amd64 -v
+	CGO_ENABLED=0 $(BUILD_FLAGS) -o bin/$(BINARY_NAME) -v
+	CGO_ENABLED=0 GOARCH=386   GOOS=windows  $(BUILD_FLAGS) -o bin/$(BINARY_NAME).windows.amd64 -v
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux  $(BUILD_FLAGS) -o bin/$(BINARY_NAME).linux.amd64 -v
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin  $(BUILD_FLAGS) -o bin/$(BINARY_NAME).darwin.amd64 -v
 
 docker-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/bitbucket.org/rsohlich/makepost golang:latest go build -o "$(BINARY_NAME)" -v
+	docker build . -t tcp-wait
