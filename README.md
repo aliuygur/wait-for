@@ -11,6 +11,19 @@ Feel free to contribute, as I will allow most merges as long as they don't drast
 You can install this using go get and adding to your gopath. You can then use as you would any packages.
 If you want to use without needing the full path you can add your go path to your shell.
 
+Using docker:
+
+```bash
+# simply run the docker run command and you will be good to go immediately
+$ docker run -it donkeyx/tcp-wait -version
+Unable to find image 'donkeyx/tcp-wait:latest' locally
+...
+Version 'docker-build'
+Git_Hash '6e567e4'
+```
+
+Using go get:
+
 ```bash
 # get the package
 go get github.com/donkeyx/tcp-wait
