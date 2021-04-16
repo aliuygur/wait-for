@@ -1,0 +1,17 @@
+FROM owncloudci/golang:1.16-arm64v8
+
+COPY ./src /app/
+WORKDIR /app
+RUN go build -o wait-for .
+
+FROM scratch
+
+LABEL maintainer="ownCloud GmbH <devops@owncloud.com>"
+LABEL org.opencontainers.image.authors="ownCloud DevOps <devops@owncloud.com>"
+LABEL org.opencontainers.image.title="ownCloud CI wait-for"
+LABEL org.opencontainers.image.url="https://hub.docker.com/r/owncloudci/wait-for"
+LABEL org.opencontainers.image.source="https://github.com/owncloud-ci/wait-for"
+LABEL org.opencontainers.image.documentation="https://github.com/owncloud-ci/wait-for"
+
+COPY --from=0 /app/wait-for /app/wait-for
+ENTRYPOINT [ "/app/wait-for" ]
