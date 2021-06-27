@@ -30,12 +30,12 @@ dockers:
   binaries:
   - "{{.ProjectName}}"
   image_templates:
+  - "docker.pkg.github.com/dx-oss/wfi/{{.ProjectName}}:latest"
+  - "docker.pkg.github.com/dx-oss/wfi/{{.ProjectName}}:{{ .Tag }}"
+  - "docker.pkg.github.com/dx-oss/wfi/{{.ProjectName}}:v{{ .Major }}"  
   - "dxdx/{{.ProjectName}}:latest"
   - "dxdx/{{.ProjectName}}:{{ .Tag }}"
-  - "dxdx/{{.ProjectName}}:v{{ .Major }}"
-  - "docker.pkg.github.com/dx-oss/{{.ProjectName}}:latest"
-  - "docker.pkg.github.com/dx-oss/{{.ProjectName}}:{{ .Tag }}"
-  - "docker.pkg.github.com/dx-oss/{{.ProjectName}}:v{{ .Major }}"  
+  - "dxdx/{{.ProjectName}}:v{{ .Major }}"  
   dockerfile: Dockerfile
   build_flag_templates:
   - "--label=org.label-schema.schema-version=1.0"
