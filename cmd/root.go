@@ -4,21 +4,30 @@ import (
 	"fmt"
 	"os"
 
-	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "wait-for",
-	Short: "Test environments",
+	Use:   "wait-for-it",
+	Short: "Waiting for service(s)",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		// cmd.Help()
+		c, _, err := cmd.Find(os.Args[1:])
+		// default cmd if no cmd is given
+		if err == nil && c.Use == cmd.Use {
+			args := append([]string{"execute"}, os.Args[1:]...)
+			cmd.SetArgs(args)
+		}
+
+		if err := cmd.Execute(); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -36,40 +45,10 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose (log.level = trace)")
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Debug (log.level = debug)")
-	rootCmd.PersistentFlags().BoolP("execute", "e", false, "Execute")
 	rootCmd.PersistentFlags().String("level", "info", "Log level")
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".wait-for" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".wait-for")
-	}
-
-	viper.SetEnvPrefix("ENVT")
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
-
-	initLogging()
-}
-
-func initLogging() {
 	levelStr, _ := rootCmd.PersistentFlags().GetString("level")
 	level, err := log.ParseLevel(levelStr)
 	if err != nil {

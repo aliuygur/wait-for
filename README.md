@@ -6,6 +6,5 @@ Fork of [alioygur/wait-for](https://github.com/alioygur/wait-for)
 
 # TODO
 
-* Finish the refactor
 * Setup goreleaser.yml and github-action pipeline for building binaries and docker image
-* Write a usage example and description
+* GitHub Actions

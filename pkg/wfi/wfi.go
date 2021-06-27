@@ -2,8 +2,6 @@ package wfi
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"net"
 	"net/http"
 	"net/url"
@@ -11,14 +9,17 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type check struct {
-	tcp *tcpCheckService
+	tcp  *tcpCheckService
 	http *url.URL
 }
 
-func(c check) String() string {
+func (c check) String() string {
 	if c.tcp != nil {
 		return c.tcp.String()
 	}
@@ -28,7 +29,7 @@ func(c check) String() string {
 	return ""
 }
 
-func(c check) execute() error {
+func (c check) execute() error {
 	if c.tcp != nil {
 		return c.executeTcp()
 	}
@@ -38,7 +39,7 @@ func(c check) execute() error {
 	return fmt.Errorf("Invalid check, has nothing to check")
 }
 
-func(c check) executeTcp() error {
+func (c check) executeTcp() error {
 	checkHost := c.tcp.String()
 
 	log.Debugf("TCP [%s]", checkHost)
@@ -48,7 +49,7 @@ func(c check) executeTcp() error {
 	return err
 }
 
-func(c check) executeHttp() error {
+func (c check) executeHttp() error {
 	checkUrl := c.http.String()
 
 	log.Debugf("HTTP [GET %s]", checkUrl)
@@ -63,7 +64,7 @@ type tcpCheckService struct {
 	port int
 }
 
-func(c tcpCheckService) String() string {
+func (c tcpCheckService) String() string {
 	return fmt.Sprintf("%s:%d", c.host, c.port)
 }
 
@@ -71,28 +72,35 @@ type WaitForChecker interface {
 	Execute() error
 }
 
-const DefaultRepeat = 1
+const DefaultWaitForBeforeStart = 0
+const DefaultSleepBetweenChecks = 1
 const DefaultTimeoutInSeconds = 30
 
 type service struct {
-	checks []check
-	repeat int
-	timeout int
+	checks             []check
+	waitBeforeStart    int
+	sleepBetweenChecks int
+	timeout            int
 }
 
-func New(services []string, timeout int, repeat int) (WaitForChecker, error) {
+func New(services []string, wait int, timeout int, sleepBetweenChecks int) (WaitForChecker, error) {
 	svc := &service{
-		timeout: timeout,
-		repeat: repeat,
-		checks: []check{},
+		waitBeforeStart:    wait,
+		timeout:            timeout,
+		sleepBetweenChecks: sleepBetweenChecks,
+		checks:             []check{},
+	}
+
+	if svc.waitBeforeStart < 1 {
+		svc.waitBeforeStart = DefaultWaitForBeforeStart
 	}
 
 	if svc.timeout < 1 {
 		svc.timeout = DefaultTimeoutInSeconds
 	}
 
-	if svc.repeat < 1 {
-		svc.repeat = DefaultRepeat
+	if svc.sleepBetweenChecks < 1 {
+		svc.sleepBetweenChecks = DefaultSleepBetweenChecks
 	}
 
 	var err error
@@ -156,7 +164,7 @@ func servicesToHttpChecks(rawServices []string) ([]check, error) {
 	checks := []check{}
 
 	for _, rawService := range rawServices {
-		if strings.HasPrefix(rawService, "http") || strings.HasPrefix(rawService, "https://"){
+		if strings.HasPrefix(rawService, "http") || strings.HasPrefix(rawService, "https://") {
 			serviceUrl, err := url.Parse(rawService)
 			if err != nil {
 				return nil, errors.Wrapf(err, "Cannot convert [%s] to URL", rawService)
@@ -172,33 +180,47 @@ func servicesToHttpChecks(rawServices []string) ([]check, error) {
 }
 
 func (svc *service) Execute() error {
-	if err := svc.waitForServices(time.Duration(svc.timeout)*time.Second); err != nil {
+	if svc.waitBeforeStart > 0 {
+		waitInSeconds := time.Duration(svc.waitBeforeStart) * time.Second
+
+		log.Tracef("Wait in %v", waitInSeconds)
+
+		time.Sleep(waitInSeconds)
+	}
+
+	if err := svc.waitForServices(time.Duration(svc.timeout)*time.Second, time.Duration(svc.sleepBetweenChecks)*time.Second); err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func(svc *service) waitForServices(timeOut time.Duration) error {
+func (svc *service) waitForServices(timeout time.Duration, sleepBetwenChecks time.Duration) error {
+	log.Tracef("Start checking with timeout %v", timeout)
+
 	var depChan = make(chan struct{})
 	var wg sync.WaitGroup
 	wg.Add(len(svc.checks))
 	go func() {
-		timeout := 1 * time.Second
-
 		for _, c := range svc.checks {
 			go func(c check) {
 				defer wg.Done()
 				for {
 					err := c.execute()
 					if err == nil {
+						log.Tracef("Check [%s] OK", c.String())
+
 						return
 					}
+
 					log.Debugln(errors.Wrapf(err, "Cannot check [%s]", c.String()))
-					// TODO: check if timeout is finish or number of repeats
-					time.Sleep(timeout)
+					log.Tracef("Wait in %v", sleepBetwenChecks)
+
+					time.Sleep(sleepBetwenChecks)
 				}
 			}(c)
 		}
+
 		wg.Wait()
 		close(depChan)
 	}()
@@ -206,8 +228,7 @@ func(svc *service) waitForServices(timeOut time.Duration) error {
 	select {
 	case <-depChan: // services are ready
 		return nil
-	case <-time.After(timeOut):
-		return fmt.Errorf("services aren't ready in %s", timeOut)
+	case <-time.After(timeout):
+		return fmt.Errorf("services aren't ready in %s", timeout)
 	}
 }
-
