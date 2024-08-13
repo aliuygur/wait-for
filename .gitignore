@@ -1,3 +1,5 @@
 .env*
 dist/
 .idea/
+wfi
+wait-for

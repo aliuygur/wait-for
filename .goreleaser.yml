@@ -1,50 +1,67 @@
 project_name: wfi
+
+before:
+  hooks:
+  - go mod tidy
+  - go generate ./...
+
 builds:
-  - id: 'wfi'
-    binary: 'wfi'
-    env:
-      - CGO_ENABLED=0
-      - VERSION={{ .Version }}
-    ldflags:
-      - -s -w -X main.build={{.Version}}
-    goos: 
-      - linux
-    goarch:
-      - amd64
-      - arm
-      - arm64      
+- id: artifact
+  binary: wfi
+  ldflags:
+  - -X 'wfi/cmd/version.version={{.Version}}'
+  env:
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  goarch:
+  - amd64
+  - arm64
+
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    amd64: x86_64
-checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Version }}-next"
+- format: tar.gz
+  # this name template makes the OS and Arch compatible with the results of `uname`.
+  name_template: >-
+    {{ .ProjectName }}_ {{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64 {{- else if eq .Arch "386" }}i386 {{- else }}{{ .Arch }}{{ end }} {{- if .Arm }}v{{ .Arm }}{{ end }} #magic___^_^___line
 changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
+    - "^docs:"
+    - "^test:"
+
+dockers:
+- id: wfi-amd64
+  image_templates:
+  - "ghcr.io/dx-oss/wfi:{{ .Tag }}"
+  - "ghcr.io/dx-oss/wfi:{{ .Major }}"
+  - "ghcr.io/dx-oss/wfi:latest"
+  dockerfile: Dockerfile
+  goos: linux
+  goarch: amd64
+  ids:
+  - artifact
+  use: buildx
+  build_flag_templates:
+  - "--platform=linux/amd64"
+- id: wfi-arm64
+  image_templates:
+  - "ghcr.io/dx-oss/wfi:{{ .Tag }}"
+  - "ghcr.io/dx-oss/wfi:{{ .Major }}"
+  - "ghcr.io/dx-oss/wfi:latest"
+  dockerfile: Dockerfile
+  goos: linux
+  goarch: arm64
+  ids:
+  - artifact
+  use: buildx
+  build_flag_templates:
+  - "--platform=linux/arm64"
+
 release:
   github:
-    owner: dxcn
+    owner: dx-oss
     name: wfi
   draft: false
   prerelease: auto
   name_template: "{{.ProjectName}}-{{.Version}}"
-dockers:
-- id: wfi
-  ids:
-  - wfi
-  use: buildx
-  image_templates:
-  - "dxdx/{{.ProjectName}}:latest"
-  - "dxdx/{{.ProjectName}}:{{ .Tag }}"
-  - "dxdx/{{.ProjectName}}:v{{ .Major }}"     
-  build_flag_templates:
-  - "--label=org.label-schema.schema-version=1.0"
-  - "--label=org.label-schema.version={{.Version}}"
-  - "--label=org.label-schema.name={{.ProjectName}}"

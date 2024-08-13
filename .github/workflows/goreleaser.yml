@@ -1,0 +1,51 @@
+name: goreleaser
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on:
+      group: ubuntu-latest
+
+    steps:
+    
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true # Fetch submodules
+          fetch-depth: 0   # Fetch all history for all branches and tags
+          token: ${{ secrets.DOCKER_GITHUB_TOKEN }}
+
+      -
+        name: Set up Go
+        uses: actions/setup-go@v4
+
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ftci
+          password: ${{ secrets.DOCKER_GITHUB_TOKEN }}
+
+      -
+        name: Get all dependencies with "go mod vendor"
+        run: |
+          go mod vendor
+
+      -
+        name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --parallelism 2 --timeout 25m0s
+        env:
+          GITHUB_TOKEN: ${{ secrets.DOCKER_GITHUB_TOKEN }}
